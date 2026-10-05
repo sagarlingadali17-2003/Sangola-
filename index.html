@@ -9,19 +9,14 @@
         <link rel="stylesheet" href="css/leaflet.css">
         <link rel="stylesheet" href="css/qgis2web.css">
         <link rel="stylesheet" href="css/fontawesome-all.min.css">
-        <link rel="stylesheet" href="css/leaflet.photon.css">
         
-        <!-- डॅशबोर्डसाठी नवीन CSS -->
+        <!-- डॅशबोर्ड आणि कस्टम पॉपअपसाठी CSS -->
         <style>
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
         .dashboard-container { display: flex; flex-direction: column; height: 100vh; }
         
         /* Header Styling */
-        .header { 
-            background: #ffffff; padding: 10px 20px; display: flex; align-items: center; 
-            justify-content: space-between; border-bottom: 1px solid #e0e0e0; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index: 1000; height: 50px;
-        }
+        .header { background: #ffffff; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index: 1000; height: 50px; }
         .header-title { font-size: 1.2rem; font-weight: bold; color: #1a73e8; display: flex; align-items: center; gap: 10px; }
         .header-stats { display: flex; gap: 15px; font-size: 0.85rem; font-weight: 500; color: #5f6368; }
         .header-stats span { background: #f1f3f4; padding: 6px 12px; border-radius: 20px; border: 1px solid #ddd; display: flex; align-items: center; gap: 5px; }
@@ -30,23 +25,19 @@
         .main-content { display: flex; flex: 1; height: calc(100vh - 70px); }
         
         /* Sidebar Styling */
-        .sidebar { 
-            width: 320px; background: #fafbfc; border-right: 1px solid #e0e0e0; 
-            display: flex; flex-direction: column; z-index: 999; box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-        }
+        .sidebar { width: 320px; background: #fafbfc; border-right: 1px solid #e0e0e0; display: flex; flex-direction: column; z-index: 999; box-shadow: 2px 0 5px rgba(0,0,0,0.05); }
         .sidebar-header { padding: 15px; font-weight: bold; font-size: 0.9rem; color: #333; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; }
         .search-box { padding: 15px; border-bottom: 1px solid #e0e0e0; }
         .search-box input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem; }
         
         .layer-catalog { flex: 1; overflow-y: auto; padding: 15px; }
         .layer-group-title { font-size: 0.85rem; color: #1a73e8; font-weight: bold; margin: 15px 0 10px 0; text-transform: uppercase; }
-        
         .layer-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f3f4; }
         .layer-info { display: flex; align-items: center; gap: 10px; }
         .layer-color-box { width: 14px; height: 14px; border: 1px solid #333; border-radius: 2px; }
         .layer-name { font-size: 0.95rem; font-weight: 500; color: #333; }
         
-        /* Toggle Switch Design */
+        /* Toggle Switch */
         .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
@@ -55,121 +46,67 @@
         input:checked + .slider:before { transform: translateX(16px); }
         
         #map { flex: 1; width: 100%; height: 100%; z-index: 1; }
+
+        /* ---------------------------------------------------
+           कस्टम पॉपअप डिझाईन (तुमच्या इमेज प्रमाणे)
+        ---------------------------------------------------- */
+        .leaflet-popup-content-wrapper { border-radius: 12px; padding: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.15); overflow: hidden; }
+        .leaflet-popup-content { margin: 0; width: 280px !important; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .leaflet-popup-close-button { color: #333 !important; font-weight: bold; padding: 5px !important; }
+        
+        .custom-popup-header { padding: 15px; border-bottom: 1px dashed #e0e0e0; background-color: #fafbfc; }
+        .tag-pill { display: inline-block; background: #e8f0fe; color: #1a73e8; font-size: 0.7rem; font-weight: 700; padding: 4px 8px; border-radius: 12px; margin-bottom: 8px; text-transform: uppercase; border: 1px solid #d2e3fc; }
+        .popup-title { font-size: 1.05rem; font-weight: bold; color: #202124; margin: 0; }
+        
+        .custom-popup-body { padding: 10px 15px; max-height: 250px; overflow-y: auto; }
+        .popup-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f3f4; font-size: 0.85rem; }
+        .popup-row:last-child { border-bottom: none; }
+        .popup-label { color: #5f6368; flex: 1; }
+        .popup-value { font-weight: 600; color: #202124; text-align: right; flex: 1; word-wrap: break-word; }
         </style>
         <title>SMC GIS Dashboard</title>
     </head>
     <body>
         <div class="dashboard-container">
-            <!-- Header Section -->
             <header class="header">
                 <div class="header-title">SMC GIS Dashboard</div>
                 <div class="header-stats">
-                    <span>26 Wards</span>
-                    <span>39 Health Units</span>
-                    <span>17 Emergency</span>
-                    <span><span class="status-dot"></span> Live System</span>
+                    <span>26 Wards</span><span>39 Health Units</span><span>17 Emergency</span><span><span class="status-dot"></span> Live System</span>
                 </div>
             </header>
 
-            <!-- Main Workspace -->
             <div class="main-content">
-                <!-- Sidebar for All Layers -->
                 <aside class="sidebar">
-                    <div class="sidebar-header">
-                        <span>LAYER CATALOG & CONTROLS</span>
-                        <span style="color: #1a73e8;">Layers</span>
-                    </div>
-                    <div class="search-box">
-                        <input type="text" placeholder="Search layers...">
-                    </div>
+                    <div class="sidebar-header"><span>LAYER CATALOG</span><span style="color: #1a73e8;">Layers</span></div>
                     
                     <div class="layer-catalog">
-                        
-                        <!-- Base Maps -->
                         <div class="layer-group-title">Base Maps</div>
-                        <div class="layer-item">
-                            <div class="layer-info"><span class="layer-name">Google Satellite</span></div>
-                            <label class="switch"><input type="checkbox" id="chk_GoogleSatellite_1" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="layer-item">
-                            <div class="layer-info"><span class="layer-name">Google Terrain</span></div>
-                            <label class="switch"><input type="checkbox" id="chk_GoogleTerrain_0"><span class="slider"></span></label>
-                        </div>
+                        <div class="layer-item"><div class="layer-info"><span class="layer-name">Google Satellite</span></div><label class="switch"><input type="checkbox" id="chk_GoogleSatellite_1" checked><span class="slider"></span></label></div>
+                        <div class="layer-item"><div class="layer-info"><span class="layer-name">Google Terrain</span></div><label class="switch"><input type="checkbox" id="chk_GoogleTerrain_0"><span class="slider"></span></label></div>
 
-                        <!-- Vector Layers -->
                         <div class="layer-group-title">Map Layers</div>
-                        
-                        <div class="layer-item">
-                            <div class="layer-info"><div class="layer-color-box" style="background:#729b6f;"></div><span class="layer-name">Buildings</span></div>
-                            <label class="switch"><input type="checkbox" id="chk_Buildings_14" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="layer-item">
-                            <div class="layer-info"><div class="layer-color-box" style="background:#85b66f;"></div><span class="layer-name">Landuse</span></div>
-                            <label class="switch"><input type="checkbox" id="chk_Landuse_13" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="layer-item">
-                            <div class="layer-info"><div class="layer-color-box" style="background:#beb297; border-radius:50%;"></div><span class="layer-name">Places</span></div>
-                            <label class="switch"><input type="checkbox" id="chk_Places_12" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="layer-item">
-                            <div class="layer-info"><div class="layer-color-box" style="background:#e15989; border-radius:50%;"></div><span class="layer-name">pois</span></div>
-                            <label class="switch"><input type="checkbox" id="chk_pois_11" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="layer-item">
-                            <div class="layer-info"><div class="layer-color-box" style="background:#e77148;"></div><span class="layer-name">Pois_1</span></div>
-                            <label class="switch"><input type="checkbox" id="chk_Pois_1_10" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="layer-item">
-                            <div class="layer-info"><div class="layer-color-box" style="background:transparent; border-top:2px solid #e8718d; height:0;"></div><span class="layer-name">Railways</span></div>
-                            <label class="switch"><input type="checkbox" id="chk_Railways_9" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="layer-item">
-                            <div class="layer-info"><div class="layer-color-box" style="background:transparent; border-top:2px solid #729b6f; height:0;"></div><span class="layer-name">Roads</span></div>
-                            <label class="switch"><input type="checkbox" id="chk_Roads_8" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="layer-item">
-                            <div class="layer-info"><div class="layer-color-box" style="background:#85b66f; border-radius:50%;"></div><span class="layer-name">Trafic</span></div>
-                            <label class="switch"><input type="checkbox" id="chk_Trafic_7" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="layer-item">
-                            <div class="layer-info"><div class="layer-color-box" style="background:#beb297;"></div><span class="layer-name">Transport</span></div>
-                            <label class="switch"><input type="checkbox" id="chk_Transport_6" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="layer-item">
-                            <div class="layer-info"><div class="layer-color-box" style="background:#e15989;"></div><span class="layer-name">Water</span></div>
-                            <label class="switch"><input type="checkbox" id="chk_Water_5" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="layer-item">
-                            <div class="layer-info"><div class="layer-color-box" style="background:transparent; border-top:2px solid #e77148; height:0;"></div><span class="layer-name">Waterways_Clip</span></div>
-                            <label class="switch"><input type="checkbox" id="chk_Waterways_Clip_4" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="layer-item">
-                            <div class="layer-info"><div class="layer-color-box" style="background:#ff9e17;"></div><span class="layer-name">Sangola_clip</span></div>
-                            <label class="switch"><input type="checkbox" id="chk_Sangola_clip_3" checked><span class="slider"></span></label>
-                        </div>
-                        <div class="layer-item">
-                            <div class="layer-info"><div class="layer-color-box" style="background:#e8718d;"></div><span class="layer-name">Adminareas</span></div>
-                            <label class="switch"><input type="checkbox" id="chk_Adminareas_2" checked><span class="slider"></span></label>
-                        </div>
-
+                        <div class="layer-item"><div class="layer-info"><div class="layer-color-box" style="background:#729b6f;"></div><span class="layer-name">Buildings</span></div><label class="switch"><input type="checkbox" id="chk_Buildings_14" checked><span class="slider"></span></label></div>
+                        <div class="layer-item"><div class="layer-info"><div class="layer-color-box" style="background:#85b66f;"></div><span class="layer-name">Landuse</span></div><label class="switch"><input type="checkbox" id="chk_Landuse_13" checked><span class="slider"></span></label></div>
+                        <div class="layer-item"><div class="layer-info"><div class="layer-color-box" style="background:#beb297; border-radius:50%;"></div><span class="layer-name">Places</span></div><label class="switch"><input type="checkbox" id="chk_Places_12" checked><span class="slider"></span></label></div>
+                        <div class="layer-item"><div class="layer-info"><div class="layer-color-box" style="background:#e15989; border-radius:50%;"></div><span class="layer-name">pois</span></div><label class="switch"><input type="checkbox" id="chk_pois_11" checked><span class="slider"></span></label></div>
+                        <div class="layer-item"><div class="layer-info"><div class="layer-color-box" style="background:#e77148;"></div><span class="layer-name">Pois_1</span></div><label class="switch"><input type="checkbox" id="chk_Pois_1_10" checked><span class="slider"></span></label></div>
+                        <div class="layer-item"><div class="layer-info"><div class="layer-color-box" style="background:transparent; border-top:2px solid #e8718d; height:0;"></div><span class="layer-name">Railways</span></div><label class="switch"><input type="checkbox" id="chk_Railways_9" checked><span class="slider"></span></label></div>
+                        <div class="layer-item"><div class="layer-info"><div class="layer-color-box" style="background:transparent; border-top:2px solid #729b6f; height:0;"></div><span class="layer-name">Roads</span></div><label class="switch"><input type="checkbox" id="chk_Roads_8" checked><span class="slider"></span></label></div>
+                        <div class="layer-item"><div class="layer-info"><div class="layer-color-box" style="background:#85b66f; border-radius:50%;"></div><span class="layer-name">Trafic</span></div><label class="switch"><input type="checkbox" id="chk_Trafic_7" checked><span class="slider"></span></label></div>
+                        <div class="layer-item"><div class="layer-info"><div class="layer-color-box" style="background:#beb297;"></div><span class="layer-name">Transport</span></div><label class="switch"><input type="checkbox" id="chk_Transport_6" checked><span class="slider"></span></label></div>
+                        <div class="layer-item"><div class="layer-info"><div class="layer-color-box" style="background:#e15989;"></div><span class="layer-name">Water</span></div><label class="switch"><input type="checkbox" id="chk_Water_5" checked><span class="slider"></span></label></div>
+                        <div class="layer-item"><div class="layer-info"><div class="layer-color-box" style="background:transparent; border-top:2px solid #e77148; height:0;"></div><span class="layer-name">Waterways_Clip</span></div><label class="switch"><input type="checkbox" id="chk_Waterways_Clip_4" checked><span class="slider"></span></label></div>
+                        <div class="layer-item"><div class="layer-info"><div class="layer-color-box" style="background:#ff9e17;"></div><span class="layer-name">Sangola_clip</span></div><label class="switch"><input type="checkbox" id="chk_Sangola_clip_3" checked><span class="slider"></span></label></div>
+                        <div class="layer-item"><div class="layer-info"><div class="layer-color-box" style="background:#e8718d;"></div><span class="layer-name">Adminareas</span></div><label class="switch"><input type="checkbox" id="chk_Adminareas_2" checked><span class="slider"></span></label></div>
                     </div>
                 </aside>
 
-                <!-- Map Container -->
                 <div id="map"></div>
             </div>
         </div>
 
-        <!-- JS Scripts -->
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
-        <script src="js/leaflet.rotatedMarker.js"></script>
-        <script src="js/leaflet.pattern.js"></script>
-        <script src="js/leaflet-hash.js"></script>
-        <script src="js/Autolinker.min.js"></script>
-        <script src="js/rbush.min.js"></script>
-        <script src="js/labelgun.min.js"></script>
-        <script src="js/labels.js"></script>
         
         <!-- Data Sources -->
         <script src="data/Adminareas_2.js"></script>
@@ -186,92 +123,105 @@
         <script src="data/Landuse_13.js"></script>
         <script src="data/Buildings_14.js"></script>
 
-        <!-- Map Initialization and Layer setup -->
         <script>
         var map = L.map('map', { zoomControl:false, maxZoom:28, minZoom:1 }).fitBounds([[17.3167,74.9955],[17.5351,75.3038]]);
-        var hash = new L.Hash(map);
-        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
-        
-        var zoomControl = L.control.zoom({ position: 'topleft' }).addTo(map);
-        var bounds_group = new L.featureGroup([]);
+        L.control.zoom({ position: 'topleft' }).addTo(map);
 
-        // 1. Google Terrain (0)
+        // ---------------------------------------------------
+        // नवीन डायनॅमिक पॉपअप जनरेटर फंक्शन (इमेज प्रमाणे)
+        // ---------------------------------------------------
+        function generateCustomPopup(feature, layerCategoryName) {
+            let props = feature.properties;
+            
+            // टायटल शोधणे (name किंवा osm_id किंवा default)
+            let title = props['name'] || props['Vill_name'] || props['type'] || (layerCategoryName + " Feature");
+            if (title === 'null' || title === '') { title = layerCategoryName + " Feature"; }
+            
+            // हेडर तयार करणे
+            let html = '<div class="custom-popup-header">' +
+                       '<span class="tag-pill">' + layerCategoryName + ' • SMC ZONE</span>' +
+                       '<h3 class="popup-title">' + title + '</h3>' +
+                       '</div><div class="custom-popup-body">';
+                       
+            // प्रॉपर्टीजची लिस्ट तयार करणे
+            for (let key in props) {
+                if(props[key] !== null && props[key] !== '') {
+                    html += '<div class="popup-row">' +
+                            '<span class="popup-label">' + key + '</span>' +
+                            '<span class="popup-value">' + props[key] + '</span>' +
+                            '</div>';
+                }
+            }
+            html += '</div>';
+            return html;
+        }
+
+        // बेस मॅप्स
         map.createPane('pane_GoogleTerrain_0'); map.getPane('pane_GoogleTerrain_0').style.zIndex = 400;
         var layer_GoogleTerrain_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {pane: 'pane_GoogleTerrain_0', maxZoom: 28});
         
-        // 2. Google Satellite (1)
         map.createPane('pane_GoogleSatellite_1'); map.getPane('pane_GoogleSatellite_1').style.zIndex = 401;
         var layer_GoogleSatellite_1 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {pane: 'pane_GoogleSatellite_1', maxZoom: 28});
-        map.addLayer(layer_GoogleSatellite_1); // Default ON
+        map.addLayer(layer_GoogleSatellite_1);
 
-        // 3. Adminareas (2)
+        // व्हेक्टर लेयर्स (येथे onEachFeature मध्ये नवीन पॉपअप फंक्शन वापरले आहे)
+        function bindCustomPopup(feature, layer, layerName) {
+            layer.bindPopup(generateCustomPopup(feature, layerName), { maxWidth: 300 });
+        }
+
         map.createPane('pane_Adminareas_2'); map.getPane('pane_Adminareas_2').style.zIndex = 402;
-        var layer_Adminareas_2 = new L.geoJson(json_Adminareas_2, { pane: 'pane_Adminareas_2', style: {color: '#333', weight: 1, fill: true, fillOpacity: 1, fillColor: 'rgba(232,113,141,1.0)'} });
+        var layer_Adminareas_2 = new L.geoJson(json_Adminareas_2, { pane: 'pane_Adminareas_2', onEachFeature: function(f, l){ bindCustomPopup(f, l, 'Admin Area'); }, style: {color: '#333', weight: 1, fillOpacity: 1, fillColor: 'rgba(232,113,141,1.0)'} });
         map.addLayer(layer_Adminareas_2);
 
-        // 4. Sangola_clip (3)
         map.createPane('pane_Sangola_clip_3'); map.getPane('pane_Sangola_clip_3').style.zIndex = 403;
-        var layer_Sangola_clip_3 = new L.geoJson(json_Sangola_clip_3, { pane: 'pane_Sangola_clip_3', style: {color: '#333', weight: 1, fill: true, fillOpacity: 1, fillColor: 'rgba(255,158,23,1.0)'} });
+        var layer_Sangola_clip_3 = new L.geoJson(json_Sangola_clip_3, { pane: 'pane_Sangola_clip_3', onEachFeature: function(f, l){ bindCustomPopup(f, l, 'Sangola Zone'); }, style: {color: '#333', weight: 1, fillOpacity: 1, fillColor: 'rgba(255,158,23,1.0)'} });
         map.addLayer(layer_Sangola_clip_3);
 
-        // 5. Waterways_Clip (4)
         map.createPane('pane_Waterways_Clip_4'); map.getPane('pane_Waterways_Clip_4').style.zIndex = 404;
-        var layer_Waterways_Clip_4 = new L.geoJson(json_Waterways_Clip_4, { pane: 'pane_Waterways_Clip_4', style: {color: 'rgba(231,113,72,1.0)', weight: 1.0, fillOpacity: 0} });
+        var layer_Waterways_Clip_4 = new L.geoJson(json_Waterways_Clip_4, { pane: 'pane_Waterways_Clip_4', onEachFeature: function(f, l){ bindCustomPopup(f, l, 'Waterway'); }, style: {color: 'rgba(231,113,72,1.0)', weight: 1.0, fillOpacity: 0} });
         map.addLayer(layer_Waterways_Clip_4);
 
-        // 6. Water (5)
         map.createPane('pane_Water_5'); map.getPane('pane_Water_5').style.zIndex = 405;
-        var layer_Water_5 = new L.geoJson(json_Water_5, { pane: 'pane_Water_5', style: {color: '#333', weight: 1, fill: true, fillOpacity: 1, fillColor: 'rgba(225,89,137,1.0)'} });
+        var layer_Water_5 = new L.geoJson(json_Water_5, { pane: 'pane_Water_5', onEachFeature: function(f, l){ bindCustomPopup(f, l, 'Water Body'); }, style: {color: '#333', weight: 1, fillOpacity: 1, fillColor: 'rgba(225,89,137,1.0)'} });
         map.addLayer(layer_Water_5);
 
-        // 7. Transport (6)
         map.createPane('pane_Transport_6'); map.getPane('pane_Transport_6').style.zIndex = 406;
-        var layer_Transport_6 = new L.geoJson(json_Transport_6, { pane: 'pane_Transport_6', style: {color: '#333', weight: 1, fill: true, fillOpacity: 1, fillColor: 'rgba(190,178,151,1.0)'} });
+        var layer_Transport_6 = new L.geoJson(json_Transport_6, { pane: 'pane_Transport_6', onEachFeature: function(f, l){ bindCustomPopup(f, l, 'Transport'); }, style: {color: '#333', weight: 1, fillOpacity: 1, fillColor: 'rgba(190,178,151,1.0)'} });
         map.addLayer(layer_Transport_6);
 
-        // 8. Trafic (7)
         map.createPane('pane_Trafic_7'); map.getPane('pane_Trafic_7').style.zIndex = 407;
-        var layer_Trafic_7 = new L.geoJson(json_Trafic_7, { pane: 'pane_Trafic_7', pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 4, color: '#333', weight: 1, fill: true, fillOpacity: 1, fillColor: 'rgba(133,182,111,1.0)'}); } });
+        var layer_Trafic_7 = new L.geoJson(json_Trafic_7, { pane: 'pane_Trafic_7', onEachFeature: function(f, l){ bindCustomPopup(f, l, 'Traffic'); }, pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 4, color: '#333', weight: 1, fillOpacity: 1, fillColor: 'rgba(133,182,111,1.0)'}); } });
         map.addLayer(layer_Trafic_7);
 
-        // 9. Roads (8)
         map.createPane('pane_Roads_8'); map.getPane('pane_Roads_8').style.zIndex = 408;
-        var layer_Roads_8 = new L.geoJson(json_Roads_8, { pane: 'pane_Roads_8', style: {color: 'rgba(114,155,111,1.0)', weight: 1.0, fillOpacity: 0} });
+        var layer_Roads_8 = new L.geoJson(json_Roads_8, { pane: 'pane_Roads_8', onEachFeature: function(f, l){ bindCustomPopup(f, l, 'Road'); }, style: {color: 'rgba(114,155,111,1.0)', weight: 1.0, fillOpacity: 0} });
         map.addLayer(layer_Roads_8);
 
-        // 10. Railways (9)
         map.createPane('pane_Railways_9'); map.getPane('pane_Railways_9').style.zIndex = 409;
-        var layer_Railways_9 = new L.geoJson(json_Railways_9, { pane: 'pane_Railways_9', style: {color: 'rgba(232,113,141,1.0)', weight: 1.0, fillOpacity: 0} });
+        var layer_Railways_9 = new L.geoJson(json_Railways_9, { pane: 'pane_Railways_9', onEachFeature: function(f, l){ bindCustomPopup(f, l, 'Railway'); }, style: {color: 'rgba(232,113,141,1.0)', weight: 1.0, fillOpacity: 0} });
         map.addLayer(layer_Railways_9);
 
-        // 11. Pois_1 (10)
         map.createPane('pane_Pois_1_10'); map.getPane('pane_Pois_1_10').style.zIndex = 410;
-        var layer_Pois_1_10 = new L.geoJson(json_Pois_1_10, { pane: 'pane_Pois_1_10', style: {color: '#333', weight: 1, fill: true, fillOpacity: 1, fillColor: 'rgba(231,113,72,1.0)'} });
+        var layer_Pois_1_10 = new L.geoJson(json_Pois_1_10, { pane: 'pane_Pois_1_10', onEachFeature: function(f, l){ bindCustomPopup(f, l, 'POI'); }, style: {color: '#333', weight: 1, fillOpacity: 1, fillColor: 'rgba(231,113,72,1.0)'} });
         map.addLayer(layer_Pois_1_10);
 
-        // 12. pois (11)
         map.createPane('pane_pois_11'); map.getPane('pane_pois_11').style.zIndex = 411;
-        var layer_pois_11 = new L.geoJson(json_pois_11, { pane: 'pane_pois_11', pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 4, color: '#333', weight: 1, fill: true, fillOpacity: 1, fillColor: 'rgba(225,89,137,1.0)'}); } });
+        var layer_pois_11 = new L.geoJson(json_pois_11, { pane: 'pane_pois_11', onEachFeature: function(f, l){ bindCustomPopup(f, l, 'POI'); }, pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 4, color: '#333', weight: 1, fillOpacity: 1, fillColor: 'rgba(225,89,137,1.0)'}); } });
         map.addLayer(layer_pois_11);
 
-        // 13. Places (12)
         map.createPane('pane_Places_12'); map.getPane('pane_Places_12').style.zIndex = 412;
-        var layer_Places_12 = new L.geoJson(json_Places_12, { pane: 'pane_Places_12', pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 4, color: '#333', weight: 1, fill: true, fillOpacity: 1, fillColor: 'rgba(190,178,151,1.0)'}); } });
+        var layer_Places_12 = new L.geoJson(json_Places_12, { pane: 'pane_Places_12', onEachFeature: function(f, l){ bindCustomPopup(f, l, 'Place'); }, pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 4, color: '#333', weight: 1, fillOpacity: 1, fillColor: 'rgba(190,178,151,1.0)'}); } });
         map.addLayer(layer_Places_12);
 
-        // 14. Landuse (13)
         map.createPane('pane_Landuse_13'); map.getPane('pane_Landuse_13').style.zIndex = 413;
-        var layer_Landuse_13 = new L.geoJson(json_Landuse_13, { pane: 'pane_Landuse_13', style: {color: '#333', weight: 1, fill: true, fillOpacity: 1, fillColor: 'rgba(133,182,111,1.0)'} });
+        var layer_Landuse_13 = new L.geoJson(json_Landuse_13, { pane: 'pane_Landuse_13', onEachFeature: function(f, l){ bindCustomPopup(f, l, 'Landuse'); }, style: {color: '#333', weight: 1, fillOpacity: 1, fillColor: 'rgba(133,182,111,1.0)'} });
         map.addLayer(layer_Landuse_13);
 
-        // 15. Buildings (14)
         map.createPane('pane_Buildings_14'); map.getPane('pane_Buildings_14').style.zIndex = 414;
-        var layer_Buildings_14 = new L.geoJson(json_Buildings_14, { pane: 'pane_Buildings_14', style: {color: '#333', weight: 1, fill: true, fillOpacity: 1, fillColor: 'rgba(114,155,111,1.0)'} });
+        var layer_Buildings_14 = new L.geoJson(json_Buildings_14, { pane: 'pane_Buildings_14', onEachFeature: function(f, l){ bindCustomPopup(f, l, 'Building'); }, style: {color: '#333', weight: 1, fillOpacity: 1, fillColor: 'rgba(114,155,111,1.0)'} });
         map.addLayer(layer_Buildings_14);
 
-        // -------------------------------------------------------------------
-        // डॅशबोर्ड साईडबार स्विच (Layer Toggle Events)
-        // -------------------------------------------------------------------
+        // Sidebar Switches Logic
         function setupToggle(checkboxId, mapLayer) {
             document.getElementById(checkboxId).addEventListener('change', function() {
                 if(this.checked) { map.addLayer(mapLayer); } else { map.removeLayer(mapLayer); }
